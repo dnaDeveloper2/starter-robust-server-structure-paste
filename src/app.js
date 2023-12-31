@@ -1,21 +1,13 @@
 const express = require("express");
 const app = express();
 const pastes = require("./data/pastes-data");
+const pastesRouter = require("./pastes/pastes.router");
+const usersRouter = require("./users/users.router");
 
-app.use("/pastes/:pasteId", (req, res, next) => {
-  const { pasteId } = req.params;
-  const foundPaste = pastes.find((paste) => paste.id === Number(pasteId));
+app.use(express.json());
 
-  if (foundPaste) {
-    res.json({ data: foundPaste });
-  } else {
-    next(`Paste id not found: ${PasteId}`);
-  }
-});
-
-app.use("/pastes", (req, res) => {
-  res.json({ data: pastes });
-});
+app.use("/pastes", pastesRouter);
+app.use("/users", usersRouter); // Note: app.use
 
 // Not found handler
 app.use((request, response, next) => {
@@ -23,9 +15,10 @@ app.use((request, response, next) => {
 });
 
 // Error handler
-app.use((error, request, response, next) => {
+app.use((error, req, res, next) => {
   console.error(error);
-  response.send(error);
+  const { status = 500, message = "Something went wrong!" } = error;
+  res.status(status).json({ error: message });
 });
 
 module.exports = app;
